@@ -1,9 +1,13 @@
-// Notifies everyone who favorited a species that new card(s) were added.
-// Called by the admin client right after a successful card add/bulk import.
+// Notifies everyone who favorited a species that it was just marked
+// completed. Called once, immediately, right when the admin flips the
+// completion switch (card-add notifications are handled separately via a
+// debounced queue, see notification_batching.sql and
+// flush-card-notifications, so several cards added in quick succession
+// become one email instead of one per card).
 // verify_jwt is ON for this function (unlike submit-bug-report), so only a
 // genuinely logged-in user can even reach this code; we additionally check
 // that caller is an admin before sending anything, so a regular logged-in
-// user can't spam other users' inboxes with fake "new card" emails.
+// user can't spam other users' inboxes with fake "completed" emails.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const MAX_PROFILE_NAME_LENGTH = 100
@@ -62,9 +66,6 @@ Deno.serve(async (req) => {
     typeof payload.pokemonName === 'string'
       ? payload.pokemonName.trim().slice(0, MAX_PROFILE_NAME_LENGTH)
       : ''
-  const cardCount = Number.isFinite(Number(payload.cardCount))
-    ? Math.max(1, Math.floor(Number(payload.cardCount)))
-    : 1
 
   if (!Number.isInteger(pokemonId) || pokemonId <= 0 || !pokemonName) {
     return jsonResponse({ ok: false, error: 'Invalid pokemonId or pokemonName.' }, 400)
@@ -117,10 +118,9 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: true, notified: 0 })
   }
 
-  const cardWord = cardCount === 1 ? 'card' : 'cards'
-  const subject = `${cardCount} new ${pokemonName} ${cardWord} added`
+  const subject = `${pokemonName} is now completed!`
   const text = [
-    `${cardCount} new ${pokemonName} ${cardWord} ${cardCount === 1 ? 'was' : 'were'} just added to Poke Species Dex.`,
+    `${pokemonName} was just marked completed on Poke Species Dex.`,
     '',
     `Check it out: ${siteUrl}/pokemon/${pokemonId}`,
     '',

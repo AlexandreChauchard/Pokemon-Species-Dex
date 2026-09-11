@@ -28,3 +28,21 @@ export async function setCompletion(pokemonId: number, completed: boolean): Prom
 
   if (error) throw new Error(error.message)
 }
+
+// Best-effort, fire-and-forget, mirrors notifyOfNewCards in cards.ts. Also
+// clears any pending (not-yet-flushed) card-add batch for this species, so
+// cards added just before completion don't also trigger a separate "N new
+// cards" email covering the same additions right after this one.
+export async function notifyFavoritesOfCompletion(
+  pokemonId: number,
+  pokemonName: string,
+): Promise<void> {
+  try {
+    await supabase.functions.invoke('notify-favorite-card', {
+      body: { pokemonId, pokemonName },
+    })
+    await supabase.rpc('clear_pending_card_notifications', { p_pokemon_id: pokemonId })
+  } catch (err) {
+    console.error('Failed to notify favorites of completion:', err)
+  }
+}

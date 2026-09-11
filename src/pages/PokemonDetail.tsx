@@ -19,7 +19,7 @@ import Switch from '../components/Switch'
 import { useAuth } from '../auth/AuthContext'
 import { fetchPokemonDetail, spriteUrlFor } from '../lib/pokeapi'
 import { fetchCardsForPokemon, reorderCards } from '../lib/cards'
-import { fetchCompletion, setCompletion } from '../lib/pokemonCompletion'
+import { fetchCompletion, notifyFavoritesOfCompletion, setCompletion } from '../lib/pokemonCompletion'
 import type { PokemonDetail as PokemonDetailType } from '../types/pokemon'
 import type { Card } from '../types/card'
 
@@ -149,10 +149,14 @@ export default function PokemonDetail() {
   }, [numericId])
 
   const handleToggleCompleted = async (next: boolean) => {
+    const wasCompleted = completed
     setCompleted(next)
     setSavingCompletion(true)
     try {
       await setCompletion(numericId, next)
+      if (next && !wasCompleted && detail) {
+        void notifyFavoritesOfCompletion(numericId, detail.name)
+      }
     } catch {
       setCompleted(!next)
     } finally {

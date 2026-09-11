@@ -8,7 +8,7 @@ import PokemonSearchSelect from '../components/PokemonSearchSelect'
 import TcgdexCandidateTile from '../components/TcgdexCandidateTile'
 import RequireAdmin from '../auth/RequireAdmin'
 import { usePokemonList } from '../hooks/usePokemonList'
-import { createCard, notifyFavoritesOfNewCard, uploadCardImage } from '../lib/cards'
+import { createCard, notifyOfNewCards, uploadCardImage } from '../lib/cards'
 import { fetchBestCardImage, fetchTcgdexCandidates } from '../lib/tcgdex'
 import type { PokemonListEntry } from '../types/pokemon'
 import type { TcgdexCandidate } from '../lib/tcgdex'
@@ -133,7 +133,7 @@ function AdminBulkAddCardsPage() {
     )
 
     if (added > 0) {
-      void notifyFavoritesOfNewCard(pokemon.id, pokemon.name, added)
+      void notifyOfNewCards(pokemon.id, pokemon.name, added)
     }
 
     setImportResult({ added, failures })

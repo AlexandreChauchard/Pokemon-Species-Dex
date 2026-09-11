@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { fetchCompletion } from './pokemonCompletion'
 import type { Card, NewCardInput } from '../types/card'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
@@ -52,20 +53,29 @@ export async function createCard(input: NewCardInput): Promise<Card> {
 }
 
 // Best-effort, fire-and-forget: a failed notification shouldn't block or
-// fail the card add itself. Called once per "logical" add (one call after a
-// bulk import batch, not once per card in it) so favoriting users get a
-// single email instead of a flood.
-export async function notifyFavoritesOfNewCard(
+// fail the card add itself. Only queues a notification for species that
+// are ALREADY marked completed, adding cards to a still-in-progress
+// checklist is routine and would just spam favoriters. The queue itself
+// (flushed by a scheduled job once a species has been quiet a couple of
+// minutes) is what collapses several adds in a row into one email instead
+// of one per card, see supabase/notification_batching.sql.
+export async function notifyOfNewCards(
   pokemonId: number,
   pokemonName: string,
   cardCount = 1,
 ): Promise<void> {
   try {
-    await supabase.functions.invoke('notify-favorite-card', {
-      body: { pokemonId, pokemonName, cardCount },
+    const completed = await fetchCompletion(pokemonId)
+    if (!completed) return
+
+    const { error } = await supabase.rpc('queue_card_notification', {
+      p_pokemon_id: pokemonId,
+      p_pokemon_name: pokemonName,
+      p_card_count: cardCount,
     })
+    if (error) throw error
   } catch (err) {
-    console.error('Failed to notify favorites:', err)
+    console.error('Failed to queue card notification:', err)
   }
 }
 
