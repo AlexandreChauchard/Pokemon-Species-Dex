@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #e0e5ec;
+  color: #2d3436;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+/* Noise texture overlay simulating matte plastic microtexture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background-color: #ff4757;
+  color: #ffffff;
+}
+
+/* Custom scrollbar to match the chassis aesthetic */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #e0e5ec;
+}
+::-webkit-scrollbar-thumb {
+  background: #babecc;
+  border-radius: 8px;
+  border: 3px solid #e0e5ec;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a3b1c6;
+}
+
+@layer utilities {
+  .text-emboss {
+    filter: drop-shadow(0 1px 0 #ffffff);
+  }
+  .text-emboss-dark {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  .bg-grid {
+    background-image: linear-gradient(#4a5568 1px, transparent 1px),
+      linear-gradient(90deg, #4a5568 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .bg-scanlines {
+    background-image: linear-gradient(
+      rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.25) 50%
+    );
+    background-size: 100% 4px;
+  }
+}
