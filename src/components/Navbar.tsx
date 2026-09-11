@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { CircleDot, ShieldCheck } from 'lucide-react'
+import { CircleDot, ShieldCheck, Trophy } from 'lucide-react'
 import LedIndicator from './LedIndicator'
 import Button from './Button'
 import { useAuth } from '../auth/AuthContext'
@@ -29,11 +29,14 @@ export default function Navbar() {
           <NavLink
             to="/ranking"
             className={({ isActive }) =>
-              `rounded-md px-3 py-2 font-mono text-xs font-bold uppercase tracking-wider transition ${
-                isActive ? 'text-accent' : 'text-ink-muted hover:text-accent'
+              `inline-flex h-10 items-center gap-2 rounded-lg px-4 font-mono text-xs font-bold uppercase tracking-wider transition-all duration-150 ease-mechanical active:translate-y-[2px] active:shadow-pressed ${
+                isActive
+                  ? 'bg-accent text-accent-foreground shadow-accent-card'
+                  : 'bg-background text-ink-muted shadow-card hover:text-accent'
               }`
             }
           >
+            <Trophy size={14} strokeWidth={2} />
             Ranking
           </NavLink>
         </nav>
