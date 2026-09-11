@@ -17,6 +17,7 @@ interface AuthContextValue {
   signUp: (email: string, password: string) => Promise<AuthResult>
   signIn: (email: string, password: string) => Promise<AuthResult>
   signOut: () => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -49,31 +50,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const loadProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, email, role, username, avatar_url, created_at')
+      .eq('id', userId)
+      .single()
+
+    if (error) {
+      console.error('Failed to load profile:', error.message)
+      setProfile(null)
+    } else {
+      setProfile(data as Profile)
+    }
+  }
+
   useEffect(() => {
     if (!session?.user) return
     let cancelled = false
     setLoading(true)
 
-    supabase
-      .from('profiles')
-      .select('id, email, role, username, created_at')
-      .eq('id', session.user.id)
-      .single()
-      .then(({ data, error }) => {
-        if (cancelled) return
-        if (error) {
-          console.error('Failed to load profile:', error.message)
-          setProfile(null)
-        } else {
-          setProfile(data as Profile)
-        }
-        setLoading(false)
-      })
+    loadProfile(session.user.id).then(() => {
+      if (!cancelled) setLoading(false)
+    })
 
     return () => {
       cancelled = true
     }
   }, [session?.user])
+
+  const refreshProfile = async () => {
+    if (session?.user) await loadProfile(session.user.id)
+  }
 
   const signUp = async (email: string, password: string): Promise<AuthResult> => {
     const { data, error } = await supabase.auth.signUp({ email, password })
@@ -100,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     signIn,
     signOut,
+    refreshProfile,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

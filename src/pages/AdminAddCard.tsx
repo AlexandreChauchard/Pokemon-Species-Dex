@@ -8,7 +8,7 @@ import Button from '../components/Button'
 import PokemonSearchSelect from '../components/PokemonSearchSelect'
 import RequireAdmin from '../auth/RequireAdmin'
 import { usePokemonList } from '../hooks/usePokemonList'
-import { createCard, uploadCardImage } from '../lib/cards'
+import { createCard, notifyFavoritesOfNewCard, uploadCardImage } from '../lib/cards'
 import type { PokemonListEntry } from '../types/pokemon'
 
 const DRAFT_KEY = 'admin-add-card-draft'
@@ -130,6 +130,7 @@ function AdminAddCardForm() {
         variant: variant.trim(),
         language: language.trim(),
       })
+      void notifyFavoritesOfNewCard(selectedPokemon.id, selectedPokemon.name)
       setSuccess(true)
       clearImage()
     } catch (err) {

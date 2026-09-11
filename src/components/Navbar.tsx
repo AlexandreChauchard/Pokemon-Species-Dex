@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { CircleDot, ShieldCheck, Trophy } from 'lucide-react'
+import { CircleDot, ShieldCheck, Trophy, UserRound } from 'lucide-react'
 import LedIndicator from './LedIndicator'
 import Button from './Button'
 import { useAuth } from '../auth/AuthContext'
@@ -72,12 +72,29 @@ export default function Navbar() {
                   Admin
                 </Link>
               )}
-              <span
-                className="hidden truncate font-mono text-xs text-ink-muted md:block md:max-w-[160px]"
-                title={profile?.email}
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 rounded-full transition hover:text-accent"
+                title="Profile"
               >
-                {profile?.username ?? profile?.email}
-              </span>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background shadow-recessed">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Your avatar"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <UserRound size={16} strokeWidth={2} className="text-ink-muted" />
+                  )}
+                </span>
+                <span
+                  className="hidden truncate font-mono text-xs text-ink-muted md:block md:max-w-[160px]"
+                  title={profile?.email}
+                >
+                  {profile?.username ?? profile?.email}
+                </span>
+              </Link>
               <Button variant="ghost" className="h-10 px-4" onClick={handleSignOut}>
                 Sign out
               </Button>

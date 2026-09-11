@@ -8,7 +8,7 @@ import PokemonSearchSelect from '../components/PokemonSearchSelect'
 import TcgdexCandidateTile from '../components/TcgdexCandidateTile'
 import RequireAdmin from '../auth/RequireAdmin'
 import { usePokemonList } from '../hooks/usePokemonList'
-import { createCard, uploadCardImage } from '../lib/cards'
+import { createCard, notifyFavoritesOfNewCard, uploadCardImage } from '../lib/cards'
 import { fetchBestCardImage, fetchTcgdexCandidates } from '../lib/tcgdex'
 import type { PokemonListEntry } from '../types/pokemon'
 import type { TcgdexCandidate } from '../lib/tcgdex'
@@ -131,6 +131,10 @@ function AdminBulkAddCardsPage() {
     await Promise.all(
       Array.from({ length: Math.min(concurrency, selectedCandidates.length) }, worker),
     )
+
+    if (added > 0) {
+      void notifyFavoritesOfNewCard(pokemon.id, pokemon.name, added)
+    }
 
     setImportResult({ added, failures })
     setImporting(false)

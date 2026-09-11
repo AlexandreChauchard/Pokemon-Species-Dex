@@ -5,6 +5,7 @@ import Ranking from './pages/Ranking'
 import PokemonDetail from './pages/PokemonDetail'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
+import Profile from './pages/Profile'
 import Admin from './pages/Admin'
 import AdminAddCard from './pages/AdminAddCard'
 import AdminBulkAddCards from './pages/AdminBulkAddCards'
@@ -19,6 +20,7 @@ function App() {
         <Route path="/pokemon/:id" element={<PokemonDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile" element={<Profile />} />
         <Route
           path="/admin"
           element={

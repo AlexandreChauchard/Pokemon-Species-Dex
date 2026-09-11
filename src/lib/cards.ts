@@ -51,6 +51,24 @@ export async function createCard(input: NewCardInput): Promise<Card> {
   return data as Card
 }
 
+// Best-effort, fire-and-forget: a failed notification shouldn't block or
+// fail the card add itself. Called once per "logical" add (one call after a
+// bulk import batch, not once per card in it) so favoriting users get a
+// single email instead of a flood.
+export async function notifyFavoritesOfNewCard(
+  pokemonId: number,
+  pokemonName: string,
+  cardCount = 1,
+): Promise<void> {
+  try {
+    await supabase.functions.invoke('notify-favorite-card', {
+      body: { pokemonId, pokemonName, cardCount },
+    })
+  } catch (err) {
+    console.error('Failed to notify favorites:', err)
+  }
+}
+
 export type CardUpdate = Partial<
   Pick<NewCardInput, 'set_name' | 'number' | 'variant' | 'language' | 'image_url'>
 >
