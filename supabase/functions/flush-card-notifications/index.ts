@@ -5,7 +5,7 @@
 // else runs.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-const DEBOUNCE_MS = 2 * 60 * 1000
+const DEBOUNCE_MS = 30 * 60 * 1000
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {

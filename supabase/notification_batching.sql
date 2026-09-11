@@ -3,7 +3,8 @@
 -- favoriters; once a species is "done", further additions are noteworthy).
 -- Several adds in a short window collapse into one email via a queue table
 -- flushed by a scheduled Edge Function once a species has been quiet for a
--- couple of minutes, instead of emailing on every single card.
+-- while (30 minutes, see DEBOUNCE_MS in flush-card-notifications), instead
+-- of emailing on every single card.
 -- Applied directly to the live DB via Claude's Postgres connection.
 
 create extension if not exists pg_cron with schema extensions;
