@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { PackageSearch, PlusCircle, ShieldCheck } from 'lucide-react'
+import { Heart, PackageSearch, PlusCircle, ShieldCheck } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../auth/AuthContext'
@@ -38,6 +38,13 @@ export default function Admin() {
             >
               <PackageSearch size={16} strokeWidth={2} />
               Bulk add cards
+            </Link>
+            <Link
+              to="/admin/favorites"
+              className="inline-flex items-center gap-2 rounded-lg bg-background px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider text-ink-muted shadow-card transition-all duration-150 ease-mechanical hover:text-accent active:translate-y-[2px] active:shadow-pressed"
+            >
+              <Heart size={16} strokeWidth={2} />
+              Favorites ranking
             </Link>
           </div>
         </div>

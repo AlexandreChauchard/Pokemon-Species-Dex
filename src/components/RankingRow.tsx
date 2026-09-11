@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { CheckCircle2, Circle } from 'lucide-react'
 import type { PokemonListEntry } from '../types/pokemon'
 
 interface RankingRowProps {
@@ -6,9 +7,18 @@ interface RankingRowProps {
   pokemon: PokemonListEntry
   count: number
   maxCount: number
+  unitLabel?: string
+  completed?: boolean
 }
 
-export default function RankingRow({ rank, pokemon, count, maxCount }: RankingRowProps) {
+export default function RankingRow({
+  rank,
+  pokemon,
+  count,
+  maxCount,
+  unitLabel = 'card',
+  completed,
+}: RankingRowProps) {
   const displayName = pokemon.name.replace(/-/g, ' ')
   const percent = maxCount > 0 ? Math.max((count / maxCount) * 100, 4) : 0
 
@@ -39,8 +49,20 @@ export default function RankingRow({ rank, pokemon, count, maxCount }: RankingRo
         />
       </div>
       <span className="w-14 shrink-0 text-right font-mono text-[11px] font-bold text-ink-muted sm:w-20 sm:text-xs">
-        {count} {count === 1 ? 'card' : 'cards'}
+        {count} {count === 1 ? unitLabel : `${unitLabel}s`}
       </span>
+      {completed !== undefined && (
+        <span
+          title={completed ? 'Completed' : 'Not completed'}
+          className={`shrink-0 ${completed ? 'text-emerald-500' : 'text-ink-muted/40'}`}
+        >
+          {completed ? (
+            <CheckCircle2 size={18} strokeWidth={2} />
+          ) : (
+            <Circle size={18} strokeWidth={2} />
+          )}
+        </span>
+      )}
     </Link>
   )
 }

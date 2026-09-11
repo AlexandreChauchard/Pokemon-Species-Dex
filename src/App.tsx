@@ -11,6 +11,7 @@ import Terms from './pages/Terms'
 import Admin from './pages/Admin'
 import AdminAddCard from './pages/AdminAddCard'
 import AdminBulkAddCards from './pages/AdminBulkAddCards'
+import AdminFavorites from './pages/AdminFavorites'
 import RequireAdmin from './auth/RequireAdmin'
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         />
         <Route path="/admin/cards/new" element={<AdminAddCard />} />
         <Route path="/admin/cards/bulk" element={<AdminBulkAddCards />} />
+        <Route path="/admin/favorites" element={<AdminFavorites />} />
       </Routes>
       <BugReportWidget />
     </>

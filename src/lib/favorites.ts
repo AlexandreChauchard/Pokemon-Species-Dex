@@ -44,3 +44,16 @@ export async function removeFavorite(id: string): Promise<void> {
     throw new Error("Remove didn't go through, please try again.")
   }
 }
+
+// Admin-only aggregate counts (who favorited what stays private, see
+// get_favorite_counts in supabase/favorite_counts.sql).
+export async function fetchFavoriteCounts(): Promise<Map<number, number>> {
+  const { data, error } = await supabase.rpc('get_favorite_counts')
+  if (error) throw new Error(error.message)
+
+  const counts = new Map<number, number>()
+  for (const row of data as { pokemon_id: number; favorite_count: number }[]) {
+    counts.set(row.pokemon_id, row.favorite_count)
+  }
+  return counts
+}
