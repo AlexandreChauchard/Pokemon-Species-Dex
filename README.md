@@ -1,32 +1,42 @@
-# React + TypeScript + Vite
+# Poke Species Dex
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A Pokemon TCG collection tracker. Browse all 1025 species, then drill into
+any one of them to see every card printed for it, organized by language,
+with per-card completion tracking and an admin catalog tool.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Vite + React + TypeScript + Tailwind CSS
+- Supabase (Postgres, Auth, Storage, Edge Functions) for data, accounts, and
+  the bug report pipeline
+- Species data and sprites from [PokeAPI](https://pokeapi.co)
+- Card data lookups (bulk import) from [TCGdex](https://tcgdex.dev)
 
-## React Compiler
+## Getting started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+cp .env.example .env.local   # fill in your Supabase project URL and anon key
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Other scripts: `npm run build`, `npm run lint`, `npm run preview`.
+
+## Project structure
+
+- `src/pages` route-level components
+- `src/components` shared UI
+- `src/lib` API clients (Supabase, PokeAPI, TCGdex, cards, bug reports)
+- `src/auth` authentication context and the admin route guard
+- `supabase/*.sql` database schema, applied directly to the project
+- `supabase/functions` Edge Functions (the bug/feedback report handler)
+
+## Features
+
+- Species browser with search and a completion filter
+- Per-species card checklist grouped by language, with admin add/edit/delete
+  and drag-and-drop reordering
+- Bulk card import from TCGdex with a review-before-import step
+- Completion tracking and a cards-per-species ranking page
+- Site-wide bug/missing-card/wrong-image report widget, emailed to the site
+  owner via a Supabase Edge Function

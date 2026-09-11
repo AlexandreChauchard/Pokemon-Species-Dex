@@ -1,5 +1,5 @@
 {
-  "name": "pokemon-card-collector",
+  "name": "poke-species-dex",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -26,7 +26,6 @@
     "@vitejs/plugin-react": "^6.1.0",
     "autoprefixer": "^10.5.5",
     "oxlint": "^1.79.0",
-    "playwright": "^1.62.1",
     "postcss": "^8.5.28",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.2",
