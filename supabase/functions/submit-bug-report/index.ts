@@ -3,6 +3,7 @@
 // bug-reports storage bucket (both have no anon/authenticated RLS policies),
 // so every check here is the real security boundary, not a formality.
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/email.ts'
 
 const REPORT_TYPES = new Set(['bug', 'missing_card', 'wrong_image'])
 const REPORT_TYPE_LABELS: Record<string, string> = {
@@ -44,7 +45,8 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
 // Plain-text emails only, so there's no HTML/script injection surface in
 // the report content, and strip control characters (incl. CR/LF) from
 // anything that could end up influencing headers, out of caution even
-// though Resend's JSON API isn't raw SMTP text.
+// though nodemailer encodes header fields itself rather than us building
+// raw SMTP text.
 function sanitizeText(value: unknown, maxLength: number): string {
   if (typeof value !== 'string') return ''
   return value
@@ -202,10 +204,9 @@ Deno.serve(async (req) => {
     screenshotUrl = signed?.signedUrl ?? null
   }
 
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
   const toEmail = Deno.env.get('BUG_REPORT_TO_EMAIL')
 
-  if (resendApiKey && toEmail) {
+  if (toEmail) {
     const lines = [
       `Type: ${REPORT_TYPE_LABELS[reportType]}`,
       `From: ${email}`,
@@ -219,29 +220,14 @@ Deno.serve(async (req) => {
       screenshotUrl ? `Screenshot (link expires in 7 days): ${screenshotUrl}` : null,
     ].filter(Boolean)
 
-    try {
-      const emailRes = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Poke Species Dex <onboarding@resend.dev>',
-          to: [toEmail],
-          reply_to: email,
-          subject: `[Poke Species Dex] ${REPORT_TYPE_LABELS[reportType]}: ${subject}`,
-          text: lines.join('\n'),
-        }),
-      })
-      if (!emailRes.ok) {
-        console.error('Resend send failed:', emailRes.status, await emailRes.text())
-      }
-    } catch (err) {
-      console.error('Resend request threw:', err instanceof Error ? err.message : err)
-    }
+    await sendEmail({
+      to: toEmail,
+      replyTo: email,
+      subject: `[Poke Species Dex] ${REPORT_TYPE_LABELS[reportType]}: ${subject}`,
+      text: lines.join('\n'),
+    })
   } else {
-    console.error('RESEND_API_KEY or BUG_REPORT_TO_EMAIL not configured; report saved but no email sent.')
+    console.error('BUG_REPORT_TO_EMAIL not configured; report saved but no email sent.')
   }
 
   return jsonResponse({ ok: true })

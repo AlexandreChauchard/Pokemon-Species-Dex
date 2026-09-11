@@ -4,6 +4,7 @@
 // shared secret header only the cron job knows, checked before anything
 // else runs.
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/email.ts'
 
 const DEBOUNCE_MS = 30 * 60 * 1000
 
@@ -36,7 +37,6 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: true, flushed: 0 }), { status: 200 })
   }
 
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
   const siteUrl = Deno.env.get('SITE_URL') ?? 'https://pokemon-card-collector-mu.vercel.app'
 
   for (const batch of batches) {
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       .select('user_id')
       .eq('pokemon_id', batch.pokemon_id)
 
-    if (favorites && favorites.length > 0 && resendApiKey) {
+    if (favorites && favorites.length > 0) {
       const userIds = favorites.map((f) => f.user_id)
       const { data: profiles } = await admin.from('profiles').select('email').in('id', userIds)
 
@@ -61,26 +61,7 @@ Deno.serve(async (req) => {
 
       for (const profile of profiles ?? []) {
         if (!profile.email) continue
-        try {
-          const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${resendApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: 'Poke Species Dex <onboarding@resend.dev>',
-              to: [profile.email],
-              subject,
-              text,
-            }),
-          })
-          if (!res.ok) {
-            console.error('Resend send failed in flush:', res.status, await res.text())
-          }
-        } catch (err) {
-          console.error('Resend request threw in flush:', err instanceof Error ? err.message : err)
-        }
+        await sendEmail({ to: profile.email, subject, text })
       }
     }
 

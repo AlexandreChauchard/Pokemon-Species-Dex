@@ -9,6 +9,7 @@
 // that caller is an admin before sending anything, so a regular logged-in
 // user can't spam other users' inboxes with fake "completed" emails.
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/email.ts'
 
 const MAX_PROFILE_NAME_LENGTH = 100
 
@@ -110,13 +111,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Could not load recipient emails.' }, 500)
   }
 
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
   const siteUrl = Deno.env.get('SITE_URL') ?? 'https://pokemon-card-collector-mu.vercel.app'
-
-  if (!resendApiKey) {
-    console.error('RESEND_API_KEY not configured; skipping notification emails.')
-    return jsonResponse({ ok: true, notified: 0 })
-  }
 
   const subject = `${pokemonName} is now completed!`
   const text = [
@@ -130,28 +125,8 @@ Deno.serve(async (req) => {
   let notified = 0
   for (const profile of profiles ?? []) {
     if (!profile.email) continue
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Poke Species Dex <onboarding@resend.dev>',
-          to: [profile.email],
-          subject,
-          text,
-        }),
-      })
-      if (res.ok) {
-        notified++
-      } else {
-        console.error('Resend send failed for a favorite notification:', res.status, await res.text())
-      }
-    } catch (err) {
-      console.error('Resend request threw:', err instanceof Error ? err.message : err)
-    }
+    const sent = await sendEmail({ to: profile.email, subject, text })
+    if (sent) notified++
   }
 
   return jsonResponse({ ok: true, notified })
