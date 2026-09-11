@@ -76,7 +76,10 @@ export default function PokemonSearchSelect({
       <input
         type="text"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          setQuery(e.target.value)
+          setIsOpen(true)
+        }}
         onFocus={() => setIsOpen(true)}
         onBlur={() => {
           blurTimeout.current = setTimeout(() => setIsOpen(false), 150)
