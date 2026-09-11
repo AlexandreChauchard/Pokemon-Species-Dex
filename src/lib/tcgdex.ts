@@ -91,6 +91,27 @@ function expandVariants(variants: TcgdexVariants | undefined): string[] {
   return active.length > 0 ? active : ['Normal']
 }
 
+// TCGdex's search endpoint is a plain substring match, so searching "Porygon"
+// also returns "Porygon2" and "Porygon-Z" cards (and "Dark Porygon2", etc).
+// Only keep cards where the species name appears as its own whole token (or
+// contiguous run of tokens, for multi-word names), splitting on spaces only
+// so a hyphenated name like "Porygon-Z" never partially matches "Porygon".
+function cardNameMatchesSpecies(cardName: string, searchName: string): boolean {
+  // The older XY-era EX cards are hyphenated ("Pikachu-EX", "Ho-Oh-EX")
+  // instead of spaced, which would otherwise look just like a real
+  // different-species suffix ("Porygon-Z"). Split that one specific suffix
+  // back into its own token before comparing.
+  const normalized = cardName.replace(/-(EX|GX)$/i, ' $1')
+  const cardTokens = normalized.split(' ')
+  const searchTokens = searchName.split(' ')
+  for (let i = 0; i <= cardTokens.length - searchTokens.length; i++) {
+    if (searchTokens.every((t, j) => cardTokens[i + j].toLowerCase() === t.toLowerCase())) {
+      return true
+    }
+  }
+  return false
+}
+
 async function mapWithConcurrency<T, R>(
   items: T[],
   limit: number,
@@ -116,7 +137,9 @@ export async function fetchTcgdexCandidates(pokemonSlug: string): Promise<Tcgdex
   if (!searchRes.ok) throw new Error('Could not reach TCGdex.')
 
   const briefs = (await searchRes.json()) as TcgdexCardBrief[]
-  const withImages = briefs.filter((brief) => brief.image)
+  const withImages = briefs.filter(
+    (brief) => brief.image && cardNameMatchesSpecies(brief.name, searchName),
+  )
 
   const details = await mapWithConcurrency(withImages, 6, async (brief) => {
     try {

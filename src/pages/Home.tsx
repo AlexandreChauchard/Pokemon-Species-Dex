@@ -6,10 +6,12 @@ import PokemonGrid from '../components/PokemonGrid'
 import Footer from '../components/Footer'
 import { usePokemonList } from '../hooks/usePokemonList'
 import { useCompletedPokemon } from '../hooks/useCompletedPokemon'
+import { useCardCounts } from '../hooks/useCardCounts'
 
 export default function Home() {
   const { pokemon, loading, error } = usePokemonList()
   const completedIds = useCompletedPokemon()
+  const { counts: cardCounts } = useCardCounts()
   const [query, setQuery] = useState('')
   const [completedOnly, setCompletedOnly] = useState(false)
 
@@ -42,6 +44,7 @@ export default function Home() {
           onQueryChange={setQuery}
           resultCount={filtered.length}
           totalCount={pokemon.length}
+          trackedCount={cardCounts.size}
           completedOnly={completedOnly}
           onCompletedOnlyChange={setCompletedOnly}
           completedCount={completedIds.size}

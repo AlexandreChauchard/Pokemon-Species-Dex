@@ -7,6 +7,7 @@ interface HeroProps {
   onQueryChange: (value: string) => void
   resultCount: number
   totalCount: number
+  trackedCount: number
   completedOnly: boolean
   onCompletedOnlyChange: (value: boolean) => void
   completedCount: number
@@ -17,6 +18,7 @@ export default function Hero({
   onQueryChange,
   resultCount,
   totalCount,
+  trackedCount,
   completedOnly,
   onCompletedOnlyChange,
   completedCount,
@@ -33,7 +35,10 @@ export default function Hero({
 
       <div className="relative mx-auto max-w-3xl text-center">
         <div className="mb-6 flex items-center justify-center gap-2">
-          <LedIndicator color="accent" label={`Tracking ${totalCount.toLocaleString()} species`} />
+          <LedIndicator
+            color="accent"
+            label={`Tracking ${trackedCount.toLocaleString()} of ${totalCount.toLocaleString()} species`}
+          />
         </div>
 
         <h1 className="text-emboss text-5xl font-extrabold tracking-[-0.03em] text-ink lg:text-6xl">
